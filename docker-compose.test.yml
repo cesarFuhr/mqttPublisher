@@ -1,0 +1,40 @@
+version: "3.8"
+
+networks:
+  integration-tests:
+    driver: bridge
+
+services:
+  test:
+    ports:
+      - "5000:5000"
+    environment:
+      - "SERVER_PORT=5000"
+      - "DB_HOST=db"
+      - "DB_PORT=5432"
+      - "DB_USER=postgres"
+      - "DB_PASSWORD=pass"
+      - "DB_NAME=postgres"
+      - "DB_DRIVER=postgres"
+      - "APP_KEYSOURCE_RSAKEY_SIZE=2048"
+      - "APP_KEYSOURCE_POOL_SIZE=10"
+    build:
+      context: .
+      dockerfile: ./builds/Dockerfile.test
+    depends_on:
+      - broker
+    networks:
+      - integration-tests
+  broker:
+    image: "emqx/emqx:4.2.11-alpine-amd64"
+    restart: on-failure
+    ports:
+      - "18000:18000"
+      - "18080:18080"
+    expose:
+      - "18000"
+    environment:
+      - "EMQX_LISTENER__TCP__EXTERNAL=18000"
+      - "EMQX_LISTENER__API__MGMT=18080"
+    networks:
+      - integration-tests

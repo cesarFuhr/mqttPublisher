@@ -1,0 +1,8 @@
+# vendoring
+vendor
+
+# bins
+main
+
+# temp
+tmp
