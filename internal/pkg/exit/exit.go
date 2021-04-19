@@ -5,7 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/cesarFuhr/gocrypto/internal/pkg/logger"
+	"github.com/cesarFuhr/mqttPublisher/internal/pkg/logger"
 	"go.uber.org/zap"
 )
 
