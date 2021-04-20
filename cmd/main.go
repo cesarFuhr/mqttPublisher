@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
-	"log"
 	"time"
 
-	"github.com/cesarFuhr/mqttPublisher/internal/app/adapters"
-	"github.com/cesarFuhr/mqttPublisher/internal/app/status"
+	"github.com/cesarFuhr/mqttPublisher/internal/adapters"
+	"github.com/cesarFuhr/mqttPublisher/internal/app"
+	"github.com/cesarFuhr/mqttPublisher/internal/app/command"
 	"github.com/cesarFuhr/mqttPublisher/internal/pkg/broker"
 	"github.com/cesarFuhr/mqttPublisher/internal/pkg/config"
 	"github.com/cesarFuhr/mqttPublisher/internal/pkg/exit"
+	"github.com/cesarFuhr/mqttPublisher/internal/ports"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
 )
@@ -24,39 +25,38 @@ func run() {
 		panic(err)
 	}
 
-	mqttClient := setupMQTTClient(cfg)
-
+	ctx := context.Background()
 	e := make(chan struct{}, 1)
 	exit.ListenToExit(e)
 
-	statusPublisher := adapters.NewStatusPublisher(mqttClient)
-	statusService := status.NewStatusService("ISS-9811", &statusPublisher)
+	application, teardown := newApplication(cfg)
 
-	tk := time.NewTicker(time.Second)
+	cron := ports.NewCronPort(application, time.Second)
+	go cron.Run(ctx)
 
-ExecutionLoop:
-	for {
-		select {
-		case <-tk.C:
-			log.Println("Status!")
-			err := statusService.Send()
-			if err != nil {
-				log.Println(err)
-			}
-		case <-e:
-			gracefullShutdown(mqttClient)
-			log.Println("Finished")
-			break ExecutionLoop
-		}
-	}
+	gracefullShutdown(ctx, e, teardown)
 }
 
-func gracefullShutdown(mqtt mqtt.Client) {
-	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func gracefullShutdown(ctx context.Context, e chan struct{}, teardown func()) {
+	<-e
+	_, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
-	mqtt.Disconnect(1000)
+	teardown()
+}
 
-	cancel()
+func newApplication(cfg config.Config) (app.Application, func()) {
+
+	mqttClient := setupMQTTClient(cfg)
+	statusPublisher := adapters.NewStatusPublisher(mqttClient)
+
+	return app.Application{
+			Commands: app.Commands{
+				NotifyStatus: command.NewStatusHandler("ISS-1312", &statusPublisher),
+			},
+		}, func() {
+			mqttClient.Disconnect(1000)
+		}
 }
 
 func setupMQTTClient(cfg config.Config) mqtt.Client {

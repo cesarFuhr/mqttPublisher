@@ -3,8 +3,9 @@ package adapters
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
-	"github.com/cesarFuhr/mqttPublisher/internal/app/status"
+	"github.com/cesarFuhr/mqttPublisher/internal/domain/status"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -20,9 +21,17 @@ type StatusPublisher struct {
 	qos    int
 }
 
+type statusNotification struct {
+	At     string
+	Status bool
+}
+
 func (p *StatusPublisher) Publish(id string, s status.Status) error {
 
-	msg, err := json.Marshal(s)
+	msg, err := json.Marshal(statusNotification{
+		At:     s.At.Format(time.RFC3339),
+		Status: s.Status,
+	})
 	if err != nil {
 		return err
 	}

@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"github.com/cesarFuhr/mqttPublisher/internal/ports"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
@@ -15,11 +16,15 @@ type HTTPLogger interface {
 // NewHTTPServer creates a new http handler
 func NewHTTPServer(
 	l HTTPLogger,
+	p ports.Http,
 ) *http.Server {
 	router := mux.NewRouter()
 	logger := newLoggerMiddleware(l)
 
 	router.Use(logger)
+
+	router.HandleFunc("/publish/pids", p.PublishPIDs).
+		Methods(http.MethodPost)
 
 	return &http.Server{
 		Handler: router,
