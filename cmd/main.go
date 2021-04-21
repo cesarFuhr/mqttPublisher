@@ -73,7 +73,7 @@ func newApplication(cfg config.Config) (app.Application, func()) {
 
 	mqttClient := setupMQTTClient(cfg)
 	statusPublisher := adapters.NewStatusPublisher(mqttClient)
-	pidPublisher := adapters.NewPIDPublisher(mqttClient)
+	pidPublisher := adapters.NewPIDPublisher(mqttClient, cfg.Publisher.Qos)
 
 	license := "ISS-1312"
 

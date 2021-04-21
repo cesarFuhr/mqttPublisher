@@ -48,16 +48,16 @@ func (p *StatusPublisher) Publish(id string, s status.Status) error {
 	return nil
 }
 
-func NewPIDPublisher(c mqtt.Client) PIDPublisher {
+func NewPIDPublisher(c mqtt.Client, qos byte) PIDPublisher {
 	return PIDPublisher{
 		client: c,
-		qos:    1,
+		qos:    qos,
 	}
 }
 
 type PIDPublisher struct {
 	client mqtt.Client
-	qos    int
+	qos    byte
 }
 
 type PIDNotification struct {

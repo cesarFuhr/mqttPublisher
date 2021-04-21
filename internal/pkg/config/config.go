@@ -26,6 +26,9 @@ type Config struct {
 		Password      string `envconfig:"MQTT_BROKER_PASSWORD"`
 		AutoReconnect bool   `envconfig:"MQTT_AUTORECONNECT"`
 	}
+	Publisher struct {
+		Qos byte `envconfig:"PUBLISHER_QOS"`
+	}
 	App struct {
 		Workers struct {
 			Number int `envconfig:"APP_WORKERS_NUMBER"`
