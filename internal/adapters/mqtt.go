@@ -8,6 +8,7 @@ import (
 	"github.com/cesarFuhr/mqttPublisher/internal/domain/pid"
 	"github.com/cesarFuhr/mqttPublisher/internal/domain/status"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/google/uuid"
 )
 
 func NewStatusPublisher(c mqtt.Client) StatusPublisher {
@@ -60,15 +61,17 @@ type PIDPublisher struct {
 }
 
 type PIDNotification struct {
-	At    string
-	Value string
+	EventID string
+	At      string
+	Value   string
 }
 
 func (p *PIDPublisher) Publish(id string, pid pid.PID) error {
 
 	msg, err := json.Marshal(PIDNotification{
-		At:    pid.At.Format(time.RFC3339),
-		Value: pid.Value,
+		EventID: uuid.NewString(),
+		At:      pid.At.Format(time.RFC3339),
+		Value:   pid.Value,
 	})
 	if err != nil {
 		return err
