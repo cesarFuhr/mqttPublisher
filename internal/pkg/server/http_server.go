@@ -14,10 +14,7 @@ type HTTPLogger interface {
 }
 
 // NewHTTPServer creates a new http handler
-func NewHTTPServer(
-	l HTTPLogger,
-	p ports.Http,
-) *http.Server {
+func NewHTTPServer(l HTTPLogger, p ports.Http) *http.Server {
 	router := mux.NewRouter()
 	logger := newLoggerMiddleware(l)
 

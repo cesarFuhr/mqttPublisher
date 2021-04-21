@@ -2,9 +2,12 @@ package ports
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"time"
 
 	"github.com/cesarFuhr/mqttPublisher/internal/app"
+	"github.com/cesarFuhr/mqttPublisher/internal/app/command"
 )
 
 func NewHttpPort(a app.Application) Http {
@@ -18,9 +21,53 @@ type Http struct {
 }
 
 func (h *Http) PublishPIDs(w http.ResponseWriter, r *http.Request) {
-	replyJSON(w, http.StatusOK, struct{ test string }{
-		test: "response",
-	})
+	var o []PID
+
+	err := decodeJSONBody(r, &o)
+	if err != nil {
+		var mr *malformedRequest
+		if errors.As(err, &mr) {
+			replyJSON(w, mr.status, HTTPError{
+				Message: mr.msg,
+			})
+			return
+		}
+		replyJSON(w, http.StatusInternalServerError, HTTPError{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	if err := h.app.Commands.NotifyPIDs.Handle(httpToCommand(o)); err != nil {
+		replyJSON(w, http.StatusInternalServerError, HTTPError{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	replyJSON(w, http.StatusOK, o)
+}
+
+type PID struct {
+	PID   string    `json:"pid"`
+	At    time.Time `json:"at"`
+	Value string    `json:"value"`
+}
+
+func httpToCommand(pids []PID) []command.PIDCommand {
+	commands := []command.PIDCommand{}
+	for _, v := range pids {
+		commands = append(commands, command.PIDCommand{
+			PID:   v.PID,
+			At:    v.At,
+			Value: v.Value,
+		})
+	}
+	return commands
+}
+
+type HTTPError struct {
+	Message string `json:"message"`
 }
 
 func replyJSON(w http.ResponseWriter, c int, o interface{}) {
