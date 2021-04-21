@@ -20,10 +20,11 @@ type Config struct {
 		Port string `envconfig:"SERVER_PORT"`
 	}
 	Broker struct {
-		Host     string `envconfig:"MQTT_BROKER_HOST"`
-		Port     int    `envconfig:"MQTT_BROKER_PORT"`
-		User     string `envconfig:"MQTT_BROKER_USER"`
-		Password string `envconfig:"MQTT_BROKER_PASSWORD"`
+		Host          string `envconfig:"MQTT_BROKER_HOST"`
+		Port          int    `envconfig:"MQTT_BROKER_PORT"`
+		User          string `envconfig:"MQTT_BROKER_USER"`
+		Password      string `envconfig:"MQTT_BROKER_PASSWORD"`
+		AutoReconnect bool   `envconfig:"MQTT_AUTORECONNECT"`
 	}
 	App struct {
 		Workers struct {

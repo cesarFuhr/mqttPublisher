@@ -89,9 +89,10 @@ func newApplication(cfg config.Config) (app.Application, func()) {
 
 func setupMQTTClient(cfg config.Config) mqtt.Client {
 	mqttCfg := broker.BrokerCfg{
-		Host:     cfg.Broker.Host,
-		Port:     cfg.Broker.Port,
-		ClientID: uuid.NewString(),
+		Host:          cfg.Broker.Host,
+		Port:          cfg.Broker.Port,
+		ClientID:      uuid.NewString(),
+		AutoReconnect: cfg.Broker.AutoReconnect,
 	}
 
 	cli, err := broker.NewBrokerClient(mqttCfg)
@@ -99,8 +100,9 @@ func setupMQTTClient(cfg config.Config) mqtt.Client {
 		panic(err)
 	}
 
-	if token := cli.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
+	err = broker.Connect(cli)
+	if err != nil {
+		panic(err)
 	}
 
 	return cli
