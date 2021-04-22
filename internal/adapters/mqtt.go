@@ -24,14 +24,14 @@ type StatusPublisher struct {
 }
 
 type statusNotification struct {
-	At     string
+	At     time.Time
 	Status bool
 }
 
 func (p *StatusPublisher) Publish(id string, s status.Status) error {
 
 	msg, err := json.Marshal(statusNotification{
-		At:     s.At.Format(time.RFC3339),
+		At:     s.At,
 		Status: s.Status,
 	})
 	if err != nil {
@@ -62,15 +62,14 @@ type PIDPublisher struct {
 
 type PIDNotification struct {
 	EventID string
-	At      string
+	At      time.Time
 	Value   string
 }
 
 func (p *PIDPublisher) Publish(id string, pid pid.PID) error {
-
 	msg, err := json.Marshal(PIDNotification{
 		EventID: uuid.NewString(),
-		At:      pid.At.Format(time.RFC3339),
+		At:      pid.At,
 		Value:   pid.Value,
 	})
 	if err != nil {
