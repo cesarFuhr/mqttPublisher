@@ -1,14 +1,14 @@
 package adapters
 
 import (
-	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/cesarFuhr/mqttPublisher/internal/domain/pid"
 	"github.com/cesarFuhr/mqttPublisher/internal/domain/status"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func NewStatusPublisher(c mqtt.Client) StatusPublisher {
@@ -23,17 +23,14 @@ type StatusPublisher struct {
 	qos    int
 }
 
-type statusNotification struct {
-	At     time.Time
-	Status bool
-}
-
 func (p *StatusPublisher) Publish(id string, s status.Status) error {
 
-	msg, err := json.Marshal(statusNotification{
-		At:     s.At,
+	statusNotification := &StatusNotification{
 		Status: s.Status,
-	})
+		At:     timestamppb.New(s.At),
+	}
+
+	msg, err := proto.Marshal(statusNotification)
 	if err != nil {
 		return err
 	}
@@ -60,18 +57,15 @@ type PIDPublisher struct {
 	qos    byte
 }
 
-type PIDNotification struct {
-	EventID string
-	At      time.Time
-	Value   string
-}
-
 func (p *PIDPublisher) Publish(id string, pid pid.PID) error {
-	msg, err := json.Marshal(PIDNotification{
+
+	pidNotification := &PIDNotification{
 		EventID: uuid.NewString(),
-		At:      pid.At,
 		Value:   pid.Value,
-	})
+		At:      timestamppb.New(pid.At),
+	}
+
+	msg, err := proto.Marshal(pidNotification)
 	if err != nil {
 		return err
 	}

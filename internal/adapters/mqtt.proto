@@ -1,0 +1,17 @@
+syntax = "proto3";
+package mqtt;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/cesarFuhr/mqttPublisher/internal/adapters";
+
+message StatusNotification {
+  bool Status = 1;
+  google.protobuf.Timestamp At = 2;
+}
+
+message PIDNotification {
+  string EventID = 1;
+  string Value = 2;
+  google.protobuf.Timestamp At = 3;
+}
