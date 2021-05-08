@@ -49,18 +49,22 @@ func (h *Http) PublishPIDs(w http.ResponseWriter, r *http.Request) {
 }
 
 type PID struct {
-	PID   string    `json:"pid"`
-	At    time.Time `json:"at"`
-	Value string    `json:"value"`
+	PID         string    `json:"pid"`
+	At          time.Time `json:"at"`
+	Value       string    `json:"value"`
+	Description string    `json:"description"`
+	Unit        string    `json:"unit"`
 }
 
 func httpToCommand(pids []PID) []command.PIDCommand {
 	commands := []command.PIDCommand{}
 	for _, v := range pids {
 		commands = append(commands, command.PIDCommand{
-			PID:   v.PID,
-			At:    v.At,
-			Value: v.Value,
+			PID:         v.PID,
+			At:          v.At,
+			Value:       v.Value,
+			Description: v.Description,
+			Unit:        v.Unit,
 		})
 	}
 	return commands

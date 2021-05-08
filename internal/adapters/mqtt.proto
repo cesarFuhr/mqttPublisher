@@ -13,5 +13,7 @@ message StatusNotification {
 message PIDNotification {
   string EventID = 1;
   string Value = 2;
-  google.protobuf.Timestamp At = 3;
+  string Unit = 3;
+  string Description = 4;
+  google.protobuf.Timestamp At = 5;
 }

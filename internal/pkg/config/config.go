@@ -30,6 +30,9 @@ type Config struct {
 		Qos byte `envconfig:"PUBLISHER_QOS"`
 	}
 	App struct {
+		Vehicle struct {
+			License string `envconfig:"APP_VEHICLE_LICENSE"`
+		}
 		Workers struct {
 			Number int `envconfig:"APP_WORKERS_NUMBER"`
 		}

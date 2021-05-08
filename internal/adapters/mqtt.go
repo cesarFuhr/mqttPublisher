@@ -60,9 +60,11 @@ type PIDPublisher struct {
 func (p *PIDPublisher) Publish(id string, pid pid.PID) error {
 
 	pidNotification := &PIDNotification{
-		EventID: uuid.NewString(),
-		Value:   pid.Value,
-		At:      timestamppb.New(pid.At),
+		EventID:     uuid.NewString(),
+		Value:       pid.Value,
+		At:          timestamppb.New(pid.At),
+		Description: pid.Description,
+		Unit:        pid.Unit,
 	}
 
 	msg, err := proto.Marshal(pidNotification)

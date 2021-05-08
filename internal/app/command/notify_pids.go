@@ -21,9 +21,11 @@ type NotifyPIDsHandler struct {
 }
 
 type PIDCommand struct {
-	PID   string
-	Value string
-	At    time.Time
+	PID         string
+	Value       string
+	At          time.Time
+	Description string
+	Unit        string
 }
 
 func (h *NotifyPIDsHandler) Handle(pids []PIDCommand) error {
@@ -51,8 +53,10 @@ func (h *NotifyPIDsHandler) Handle(pids []PIDCommand) error {
 
 func (s *NotifyPIDsHandler) publishAsync(ctx context.Context, res chan error, cmd PIDCommand) {
 	res <- s.Pub.Publish(s.ID, pid.PID{
-		PID:   cmd.PID,
-		Value: cmd.Value,
-		At:    cmd.At,
+		PID:         cmd.PID,
+		Value:       cmd.Value,
+		At:          cmd.At,
+		Description: cmd.Description,
+		Unit:        cmd.Unit,
 	})
 }
