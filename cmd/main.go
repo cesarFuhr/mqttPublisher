@@ -74,11 +74,13 @@ func newApplication(cfg config.Config) (app.Application, func()) {
 	mqttClient := setupMQTTClient(cfg)
 	statusPublisher := adapters.NewStatusPublisher(mqttClient)
 	pidPublisher := adapters.NewPIDPublisher(mqttClient, cfg.Publisher.Qos)
+	dtcPublisher := adapters.NewDTCPublisher(mqttClient, cfg.Publisher.Qos)
 
 	return app.Application{
 			Commands: app.Commands{
 				NotifyStatus: command.NewStatusHandler(cfg.App.Vehicle.License, &statusPublisher),
 				NotifyPIDs:   command.NewPIDsHandler(cfg.App.Vehicle.License, &pidPublisher),
+				NotifyDTCs:   command.NewDTCHandler(cfg.App.Vehicle.License, &dtcPublisher),
 			},
 		}, func() {
 			mqttClient.Disconnect(1000)

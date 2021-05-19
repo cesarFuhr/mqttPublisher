@@ -9,4 +9,5 @@ type Application struct {
 type Commands struct {
 	NotifyStatus command.NotifyStatusHandler
 	NotifyPIDs   command.NotifyPIDsHandler
+	NotifyDTCs   command.NotifyDTCsHandler
 }

@@ -17,3 +17,9 @@ message PIDNotification {
   string Description = 4;
   google.protobuf.Timestamp At = 5;
 }
+
+message DTCNotification {
+  string EventID = 1;
+  string Description = 2;
+  google.protobuf.Timestamp At = 3;
+}

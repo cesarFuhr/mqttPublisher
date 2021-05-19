@@ -22,6 +22,8 @@ func NewHTTPServer(l HTTPLogger, p ports.Http) *http.Server {
 
 	router.HandleFunc("/publish/pids", p.PublishPIDs).
 		Methods(http.MethodPost)
+	router.HandleFunc("/publish/dtcs", p.PublishDTCs).
+		Methods(http.MethodPost)
 
 	return &http.Server{
 		Handler: router,

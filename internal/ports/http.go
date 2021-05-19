@@ -20,6 +20,34 @@ type Http struct {
 	app app.Application
 }
 
+func (h *Http) PublishDTCs(w http.ResponseWriter, r *http.Request) {
+	var o []DTC
+
+	err := decodeJSONBody(r, &o)
+	if err != nil {
+		var mr *malformedRequest
+		if errors.As(err, &mr) {
+			replyJSON(w, mr.status, HTTPError{
+				Message: mr.msg,
+			})
+			return
+		}
+		replyJSON(w, http.StatusInternalServerError, HTTPError{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	if err := h.app.Commands.NotifyDTCs.Handle(httpDTCToCommand(o)); err != nil {
+		replyJSON(w, http.StatusInternalServerError, HTTPError{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	replyJSON(w, http.StatusOK, o)
+}
+
 func (h *Http) PublishPIDs(w http.ResponseWriter, r *http.Request) {
 	var o []PID
 
@@ -38,7 +66,7 @@ func (h *Http) PublishPIDs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.app.Commands.NotifyPIDs.Handle(httpToCommand(o)); err != nil {
+	if err := h.app.Commands.NotifyPIDs.Handle(httpPIDToCommand(o)); err != nil {
 		replyJSON(w, http.StatusInternalServerError, HTTPError{
 			Message: err.Error(),
 		})
@@ -46,6 +74,12 @@ func (h *Http) PublishPIDs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	replyJSON(w, http.StatusOK, o)
+}
+
+type DTC struct {
+	DTC         string    `json:"dtc"`
+	At          time.Time `json:"at"`
+	Description string    `json:"description"`
 }
 
 type PID struct {
@@ -56,7 +90,19 @@ type PID struct {
 	Unit        string    `json:"unit"`
 }
 
-func httpToCommand(pids []PID) []command.PIDCommand {
+func httpDTCToCommand(dtcs []DTC) []command.DTCCommand {
+	commands := []command.DTCCommand{}
+	for _, v := range dtcs {
+		commands = append(commands, command.DTCCommand{
+			DTC:         v.DTC,
+			At:          v.At,
+			Description: v.Description,
+		})
+	}
+	return commands
+}
+
+func httpPIDToCommand(pids []PID) []command.PIDCommand {
 	commands := []command.PIDCommand{}
 	for _, v := range pids {
 		commands = append(commands, command.PIDCommand{
