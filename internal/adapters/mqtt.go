@@ -96,7 +96,6 @@ type DTCPublisher struct {
 }
 
 func (p *DTCPublisher) Publish(id string, dtc dtc.DTC) error {
-
 	dtcNotification := &DTCNotification{
 		EventID:     uuid.NewString(),
 		At:          timestamppb.New(dtc.At),
